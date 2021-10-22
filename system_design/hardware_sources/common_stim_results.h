@@ -7,9 +7,18 @@
     int err = 0;
     int i;
 
-    for (i=0; i<IMAGE_SIZE*2; i++) {
+    printf("comparing magnitudes: \n");
+    for (i=0; i<IMAGE_SIZE; i++) {
       if (sw_results[i] != hw_results[i]) {
-         printf("difference: sw: %f hw: %f \n", sw_results[i], hw_results[i]);
+         printf("difference[%d]: sw: %f hw: %f \n", i, sw_results[i], hw_results[i]);
+         err++;
+      }
+    }
+
+    printf("comparing angles: \n");
+    for (i=IMAGE_SIZE; i<IMAGE_SIZE * 2; i++) {
+      if (sw_results[i] != hw_results[i]) {
+         printf("difference[%d]: sw: %f hw: %f \n", i-IMAGE_SIZE, sw_results[i], hw_results[i]);
          err++;
       }
     }
@@ -116,8 +125,11 @@
         f = a * kernel[0] + b * kernel[1] + c * kernel[2];
 
         offset = calc_interleave(x, y, IMAGE_WIDTH) + 8;
+        if (f > 127.0) f = 127.0;
+        if (f < -128.0) f = -128.0;
         r = float_to_fixed(f, 8, 8);
         TB_WRITE_8(dy + offset, r);
+printf("vd y: %d x: %d offset: %d value: %f \n", y, x, offset, f);
       }
     }
   }
@@ -154,8 +166,11 @@
         f = a * kernel[0] + b * kernel[1] + c * kernel[2];
   
         offset = calc_interleave(x, y, IMAGE_WIDTH);
+        if (f > 127.0) f = 127.0;
+        if (f < -128.0) f = -128.0;
         r = float_to_fixed(f, 8, 8);
         TB_WRITE_8(dy + offset, r);
+printf("hd y: %d x: %d offset: %d value: %f (%d + %d) \n", y, x, offset, f, a, 0-c);
       }
     }
   }
@@ -168,8 +183,8 @@
                         unsigned char  *temp,
                         float          *data_out) 
   {
-    unsigned long magnitude_array;
-    unsigned long angle_array; 
+    unsigned long long magnitude_array;
+    unsigned long long angle_array; 
     unsigned char magnitude;
     unsigned char angle;
     int i;
@@ -186,16 +201,18 @@
     // copy from temp to data_out
     // convert from fixed point to floats as it is copied
   
-    for (i=0; i<IMAGE_SIZE; i+=8) {
-  
+    for (i=0; i<IMAGE_SIZE * 2; i+=2 * N) {
        magnitude_array = TB_READ_64(temp + i );
-       angle_array     = TB_READ_64(temp + i + 8);
+       angle_array     = TB_READ_64(temp + i + N);
   
+printf("magnitudes read at: %08x = %016llx \n", temp + i, magnitude_array);
+printf("angles read at:     %08x = %016llx \n", temp + i + N, angle_array);  
+
        for (j=0; j<8; j++) {
           magnitude = (magnitude_array >> (j * 8)) & 0xFF;
           angle = (angle_array >> (j * 8)) & 0xFF;
-          data_out[i + j] = fixed_to_float(magnitude, 8, 8);
-          data_out[IMAGE_SIZE + i + j] = fixed_to_float(angle, 8, 3);
+          data_out[i/2 + j] = fixed_to_float(magnitude, 8, 8);
+          data_out[IMAGE_SIZE + i/2 + j] = fixed_to_float(angle, 8, 3);
        }
     } 
   }
@@ -318,4 +335,25 @@
     verticalDerivativeSw(data_in, dy, kernel);
     horizontalDerivativeSw(data_in, dx, kernel);
     magnitudeAngleSw(dx, dy, data_out);
+
+    // compare dx
+    
+    int x, y, ih, is;
+    for (y=0; y<IMAGE_HEIGHT; y++) {
+      for (x=0; x<IMAGE_WIDTH; x++) {
+        is = y * IMAGE_WIDTH + x;
+        ih = calc_interleave(x, y, IMAGE_WIDTH);
+        printf("sw dx[%d] = %f hw dx[%d] = %f \n", is, dx[is], ih, (float) (signed char) TB_READ_8(0x70001000 + ih));
+      }
+    } 
+    // compare dy
+    
+    for (y=0; y<IMAGE_HEIGHT; y++) {
+      for (x=0; x<IMAGE_WIDTH; x++) {
+        is = y * IMAGE_WIDTH + x;
+        ih = calc_interleave(x, y, IMAGE_WIDTH) + 8;
+        printf("sw dy[%d] = %f hw dy[%d] = %f \n", is, dy[is], ih, (float) (signed char) TB_READ_8(0x70001000 + ih));
+      }
+    } 
+
   }

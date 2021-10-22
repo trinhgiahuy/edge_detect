@@ -109,6 +109,8 @@ public:
     
           dx.set_slc(0, dx_buffer.slc<8>(n*8));
           dy.set_slc(0, dy_buffer.slc<8>(n*8));
+
+printf(">>>> i: %d dx: %f dy %f \n", i + n, dx.to_double(), dy.to_double());
     
           dx_sq = dx * dx;
           dy_sq = dy * dy;
@@ -119,9 +121,16 @@ public:
           // Catapult's math library piecewise linear implementation of sqrt and atan2
     
           ac_math::ac_sqrt_pwl(sum,sq_rt);
+          if (sq_rt.to_double() > 127.0) sq_rt = 127.0;
+          if (sq_rt.to_double() < -128.0) sq_rt = -128.0;
           magnitude_buffer.set_slc(n*8, (ac_int<8, false>) sq_rt.to_uint());
           ac_math::ac_atan2_cordic((ac_fixed<9,9>)dy, (ac_fixed<9,9>)dx, at);
+          if (at.to_double() > 31.9375) at = 31.9375;
+          if (at.to_double() < -32.0) at = -32.0;
           angle_buffer.set_slc(n*8, (ac_int<8, false>) at.slc<8>(0));
+
+printf("<<<< i: %d sqrt: %f (sent: %d %02x) \n", i+ n, sq_rt.to_double(), magnitude_buffer.slc<8>(n*8).to_int(), magnitude_buffer.slc<8>(n*8).to_int());
+printf("<<<< i: %d angle: %f (sent: %d %02x) \n", i + n, at.to_double(), angle_buffer.slc<8>(n*8).to_int(), angle_buffer.slc<8>(n*8).to_int());
         }
     
         mem_out_addr.Push((ac_int<32, false>) (output_offset.read() + i * 2));

@@ -38,19 +38,19 @@
 
 //#define TB_READ_8(ADDR)                   (r_master.read_8(ADDR).data)
 //#define TB_READ_8(ADDR)                   (r_master.small_read(ADDR, 8).data)
-#define TB_READ_8(ADDR)                   (r_master.read_8((int)(long)(ADDR)).data)
+#define TB_READ_8(ADDR)                   (r_master.read_8((int)(long)(ADDR)).data.to_uint())
 #define TB_WRITE_8(ADDR, DATA)            (w_master.write_8((int)(long)(ADDR), (DATA)))
 
-#define TB_READ_16(ADDR)                  (r_master.read_16((int)(long)(ADDR)).data)
+#define TB_READ_16(ADDR)                  (r_master.read_16((int)(long)(ADDR)).dat.to_uint()a)
 #define TB_WRITE_16(ADDR, DATA)           (w_master.write_16((int)(long)(ADDR), (DATA)))
 
-#define TB_READ_32(ADDR)                  (r_master.read_32((int)(long)(ADDR)).data)
+#define TB_READ_32(ADDR)                  (r_master.read_32((int)(long)(ADDR)).data.to_uint())
 #define TB_WRITE_32(ADDR, DATA)           (w_master.write_32((int)(long)(ADDR), (DATA)))
 
 //#define TB_READ_64(ADDR)                  (r_master.single_read(ADDR).data)
 //#define TB_WRITE_64(ADDR, DATA)           (w_master.single_write((ADDR), (DATA)))
 
-#define TB_READ_64(ADDR)                  (r_master.single_read((int)(long)(ADDR)).data)
+#define TB_READ_64(ADDR)                  (r_master.single_read((int)(long)(ADDR)).data.to_uint64())
 #define TB_WRITE_64(ADDR, DATA)           (w_master.single_write((int)(long)(ADDR), (DATA)))
 
 #define REG_READ(ADDR)                    (r_master.single_read((int)(long)(ADDR)).data)
