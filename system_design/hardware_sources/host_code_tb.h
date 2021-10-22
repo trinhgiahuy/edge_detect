@@ -46,8 +46,8 @@ public:
 
     load_data(sw_image, (unsigned char *) 0x70000000);
 
-    edge_detect_hw((unsigned char *) 0x70000000, hw_data_out);
     edge_detect_sw(sw_image, sw_data_out);
+    edge_detect_hw((unsigned char *) 0x70000000, hw_data_out);
 
     check_results(sw_data_out, hw_data_out);
 

@@ -36,11 +36,11 @@
   }
 
 
-  static inline unsigned int float_to_fixed(float f, int width, int integer_bits)
+  static inline unsigned int float_to_fixed(float f, unsigned int width, unsigned int integer_bits)
   { 
     unsigned long mask = (1 << width) - 1;
     unsigned int  fractional_bits = width - integer_bits;
-    unsigned long fbits;
+    signed long   fbits;
     int neg;
     
     if (f < 0) neg = 1; else neg = 0;
@@ -54,7 +54,7 @@
   }
   
   
-  static inline float fixed_to_float(int fixed_value, int width, int integer_bits)
+  static inline float fixed_to_float(int fixed_value, unsigned int width, unsigned int integer_bits)
   { 
     unsigned int  fractional_bits = width - integer_bits;
     unsigned long mask = (1 << width) - 1;
@@ -68,6 +68,16 @@
      
     if (neg) f = f * -1.0;
     
+    return f;
+  }
+  
+  static inline float ufixed_to_float(unsigned int fixed_value, unsigned int width, unsigned int integer_bits)
+  { 
+    unsigned int  fractional_bits = width - integer_bits;
+    float f;
+    
+    f = ((float) fixed_value) / ((float)(1 << fractional_bits)) ;
+     
     return f;
   }
   
@@ -90,7 +100,7 @@
   {
     int index = y * w + x;
   
-    return index + (index/8) * 8;
+    return index + (index/4) * 4;
   } 
   
   //--------------------------------------------------------------------------
@@ -110,7 +120,7 @@
     int a;
     int b;
     int c;
-    unsigned char r;
+    unsigned short r;
   
     for (y = 0; y < IMAGE_HEIGHT; y++) {
       for (x = 0; x < IMAGE_WIDTH; x++) {
@@ -124,12 +134,9 @@
 
         f = a * kernel[0] + b * kernel[1] + c * kernel[2];
 
-        offset = calc_interleave(x, y, IMAGE_WIDTH) + 8;
-        if (f > 127.0) f = 127.0;
-        if (f < -128.0) f = -128.0;
-        r = float_to_fixed(f, 8, 8);
-        TB_WRITE_8(dy + offset, r);
-printf("vd y: %d x: %d offset: %d value: %f \n", y, x, offset, f);
+        offset = calc_interleave(x, y, IMAGE_WIDTH) + 4;
+        r = float_to_fixed(f, 16, 16);
+        TB_WRITE_16(dy + offset * 2, r);
       }
     }
   }
@@ -150,7 +157,7 @@ printf("vd y: %d x: %d offset: %d value: %f \n", y, x, offset, f);
     int a;
     int b;
     int c;
-    unsigned char r;
+    unsigned short r;
 
     for (y = 0; y < IMAGE_HEIGHT; y++) {
       for (x = 0; x < IMAGE_WIDTH; x++) {
@@ -166,11 +173,8 @@ printf("vd y: %d x: %d offset: %d value: %f \n", y, x, offset, f);
         f = a * kernel[0] + b * kernel[1] + c * kernel[2];
   
         offset = calc_interleave(x, y, IMAGE_WIDTH);
-        if (f > 127.0) f = 127.0;
-        if (f < -128.0) f = -128.0;
-        r = float_to_fixed(f, 8, 8);
-        TB_WRITE_8(dy + offset, r);
-printf("hd y: %d x: %d offset: %d value: %f (%d + %d) \n", y, x, offset, f, a, 0-c);
+        r = float_to_fixed(f, 16, 16);
+        TB_WRITE_16(dy + offset * 2, r);
       }
     }
   }
@@ -201,17 +205,14 @@ printf("hd y: %d x: %d offset: %d value: %f (%d + %d) \n", y, x, offset, f, a, 0
     // copy from temp to data_out
     // convert from fixed point to floats as it is copied
   
-    for (i=0; i<IMAGE_SIZE * 2; i+=2 * N) {
+    for (i=0; i<IMAGE_SIZE * 2; i+=2 * 8) {
        magnitude_array = TB_READ_64(temp + i );
-       angle_array     = TB_READ_64(temp + i + N);
+       angle_array     = TB_READ_64(temp + i + 8);
   
-printf("magnitudes read at: %08x = %016llx \n", temp + i, magnitude_array);
-printf("angles read at:     %08x = %016llx \n", temp + i + N, angle_array);  
-
        for (j=0; j<8; j++) {
           magnitude = (magnitude_array >> (j * 8)) & 0xFF;
           angle = (angle_array >> (j * 8)) & 0xFF;
-          data_out[i/2 + j] = fixed_to_float(magnitude, 8, 8);
+          data_out[i/2 + j] = ufixed_to_float(magnitude, 8, 8);
           data_out[IMAGE_SIZE + i/2 + j] = fixed_to_float(angle, 8, 3);
        }
     } 
@@ -336,6 +337,7 @@ printf("angles read at:     %08x = %016llx \n", temp + i + N, angle_array);
     horizontalDerivativeSw(data_in, dx, kernel);
     magnitudeAngleSw(dx, dy, data_out);
 
+    /*
     // compare dx
     
     int x, y, ih, is;
@@ -355,5 +357,6 @@ printf("angles read at:     %08x = %016llx \n", temp + i + N, angle_array);
         printf("sw dy[%d] = %f hw dy[%d] = %f \n", is, dy[is], ih, (float) (signed char) TB_READ_8(0x70001000 + ih));
       }
     } 
+    */
 
   }

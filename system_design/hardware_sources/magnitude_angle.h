@@ -15,7 +15,7 @@
 #include <ac_math/ac_sqrt_pwl.h>
 #include <ac_math/ac_atan2_cordic.h>
 
-#define N 8
+#define N 4
 
 typedef ac_int<10, false>  dimension_type;
 typedef ac_int<64, false>  bus_type;
@@ -78,8 +78,8 @@ public:
 
     while (1) {
 
-      ac_int<64, false> dx_buffer;
-      ac_int<64, false> dy_buffer;
+      ac_int<64, false> dx_buffer[2];
+      ac_int<64, false> dy_buffer[2];
       ac_int<64, false> magnitude_buffer;
       ac_int<64, false> angle_buffer;
   
@@ -87,50 +87,52 @@ public:
 
       start.sync_in();
 
-      for (int i=0; i<height.read()*width.read(); i+=N) {
+      for (int i=0; i<height.read()*width.read(); i+=8) {
   
-        mem_in_addr.Push((ac_int<32, false>) ((input_offset.read().to_int() + i * 2)));
-        mem_in_burst.Push(1);
+        mem_in_addr.Push((ac_int<32, false>) ((input_offset.read().to_int() + i * 4)));
+        mem_in_burst.Push(3);
     
-        dx_buffer = mem_in_data.Pop();
-        dy_buffer = mem_in_data.Pop();
+        dx_buffer[0] = mem_in_data.Pop();
+        dy_buffer[0] = mem_in_data.Pop();
+        dx_buffer[1] = mem_in_data.Pop();
+        dy_buffer[1] = mem_in_data.Pop();
 
-        for (int n=0; n<N; n++) {
-    
-          ac_fixed<8, 8, true> dx;
-          ac_fixed<8, 8, true> dy;
-    
-          sqType dx_sq;
-          sqType dy_sq;
-    
-          sumType sum; // fixed point integer for sqrt
-          sumFixedPointType sum_fixed_point;
-          angType at;
-    
-          dx.set_slc(0, dx_buffer.slc<8>(n*8));
-          dy.set_slc(0, dy_buffer.slc<8>(n*8));
+        for (int j=0; j<2; j++) {
 
-printf(">>>> i: %d dx: %f dy %f \n", i + n, dx.to_double(), dy.to_double());
+          for (int n=0; n<N; n++) {
     
-          dx_sq = dx * dx;
-          dy_sq = dy * dy;
-
-          sum_fixed_point = dx_sq + dy_sq;
-          sum = sum_fixed_point.to_int();
-
-          // Catapult's math library piecewise linear implementation of sqrt and atan2
-    
-          ac_math::ac_sqrt_pwl(sum,sq_rt);
-          if (sq_rt.to_double() > 127.0) sq_rt = 127.0;
-          if (sq_rt.to_double() < -128.0) sq_rt = -128.0;
-          magnitude_buffer.set_slc(n*8, (ac_int<8, false>) sq_rt.to_uint());
-          ac_math::ac_atan2_cordic((ac_fixed<9,9>)dy, (ac_fixed<9,9>)dx, at);
-          if (at.to_double() > 31.9375) at = 31.9375;
-          if (at.to_double() < -32.0) at = -32.0;
-          angle_buffer.set_slc(n*8, (ac_int<8, false>) at.slc<8>(0));
-
-printf("<<<< i: %d sqrt: %f (sent: %d %02x) \n", i+ n, sq_rt.to_double(), magnitude_buffer.slc<8>(n*8).to_int(), magnitude_buffer.slc<8>(n*8).to_int());
-printf("<<<< i: %d angle: %f (sent: %d %02x) \n", i + n, at.to_double(), angle_buffer.slc<8>(n*8).to_int(), angle_buffer.slc<8>(n*8).to_int());
+            ac_fixed<16, 16, true> dx;
+            ac_fixed<16, 16, true> dy;
+      
+            sqType dx_sq;
+            sqType dy_sq;
+      
+            sumType sum; // fixed point integer for sqrt
+            sumFixedPointType sum_fixed_point;
+            angType at;
+      
+            dx.set_slc(0, dx_buffer[j].slc<16>(n*16));
+            dy.set_slc(0, dy_buffer[j].slc<16>(n*16));
+  
+            dx_sq = dx * dx;
+            dy_sq = dy * dy;
+  
+            sum_fixed_point = dx_sq + dy_sq;
+            sum = sum_fixed_point.to_int();
+  
+            // Catapult's math library piecewise linear implementation of sqrt and atan2
+      
+            ac_math::ac_sqrt_pwl(sum,sq_rt);
+            // use staurating/rounding types
+            // if (sq_rt.to_double() > 127.0) sq_rt = 127.0;
+            // if (sq_rt.to_double() < -128.0) sq_rt = -128.0;
+            magnitude_buffer.set_slc(j*32 + n*8, (ac_int<8, false>) sq_rt.to_uint());
+            ac_math::ac_atan2_cordic((ac_fixed<9,9>)dy, (ac_fixed<9,9>)dx, at);
+            // use staurating/rounding types
+            //if (at.to_double() > 31.9375) at = 31.9375;
+            //if (at.to_double() < -32.0) at = -32.0;
+            angle_buffer.set_slc(j*32 + n*8, (ac_int<8, false>) at.slc<8>(0));
+          }
         }
     
         mem_out_addr.Push((ac_int<32, false>) (output_offset.read() + i * 2));
