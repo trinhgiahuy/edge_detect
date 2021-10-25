@@ -10,7 +10,6 @@
 #include "edge_defs.h"
 
 #include <sys/times.h>
-#include <sys/time.h>
 
 class EdgeDetect_Algorithm
 {
@@ -19,37 +18,32 @@ public:
   // Constructor
   EdgeDetect_Algorithm() {}
 
+  // Additions to time operations
   struct tms start, end;
-  struct timeval start_time, end_time;
 
   void start_timer()
   {
      times(&start);
-     gettimeofday(&start_time, NULL);
   }
 
   void end_timer(char *s)
   {
      clock_t user_time, system_time;
-     time_t  elapsed_time;
 
      times(&end);
-     gettimeofday(&end_time, NULL);
 
      user_time = end.tms_utime - start.tms_utime;
      system_time = end.tms_stime - start.tms_stime;
-     elapsed_time = (end_time.tv_sec - start_time.tv_sec) * 1000000 + end_time.tv_usec - start_time.tv_usec;
 
      printf("%-12s ", s);
-     printf("User time: %5d ", user_time);
-     printf("System time: %5d ", system_time);
-     printf("Total time: %5d ", user_time + system_time);
-     printf("Elapsed time (us): %8d \n", elapsed_time);
+     printf("User time: %5.2f ", user_time/100.0);
+     printf("System time: %5.2f ", system_time/100.0);
+     printf("Total time: %5.2f \n", (user_time + system_time)/100.0);
   }
 
   //--------------------------------------------------------------------------
   // Function: run
-  //   Top interface for data in/out of class. Combines vertical and 
+  //   Top interface for data inout of class. Combines vertical and 
   //   horizontal derivative and magnitude/angle computation.
   void run(unsigned char *dat_in,  // image data (streamed in by pixel)
            double        *magn,    // magnitude output
