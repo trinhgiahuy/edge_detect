@@ -33,9 +33,6 @@ main(int argc, char *argv[])
     return(-1);
   }
 
-  //std::string bmpIn(argv[1]);  // input bitmap file
-
-  //bmp_read((char*)bmpIn.c_str(), &width, &height, &rarray, &garray, &barray);
   bmp_read(argv[1], &width, &height, &rarray, &garray, &barray);
 
   cout << "Running" << endl;

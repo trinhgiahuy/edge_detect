@@ -28,7 +28,7 @@ public:
      gettimeofday(&start_time, NULL);
   }
 
-  void end_timer()
+  void end_timer(char *s)
   {
      clock_t user_time, system_time;
      time_t  elapsed_time;
@@ -40,10 +40,11 @@ public:
      system_time = end.tms_stime - start.tms_stime;
      elapsed_time = (end_time.tv_sec - start_time.tv_sec) * 1000000 + end_time.tv_usec - start_time.tv_usec;
 
-     printf("User_time: %d \n", user_time);
-     printf("System time: %d \n", system_time);
-     printf("Total time: %d \n", user_time + system_time);
-     printf("Elapsed_time (us): %d \n", elapsed_time);
+     printf("%-12s ", s);
+     printf("User time: %5d ", user_time);
+     printf("System time: %5d ", system_time);
+     printf("Total time: %5d ", user_time + system_time);
+     printf("Elapsed time (us): %8d \n", elapsed_time);
   }
 
   //--------------------------------------------------------------------------
@@ -61,12 +62,10 @@ public:
     double *dx = (double *)malloc(imageHeight*imageWidth*sizeof(double));
 
     start_timer();
-    for (int i=0; i<1000; i++) verticalDerivative(dat_in, dy, imageWidth, imageHeight);
-    end_timer(); start_timer();
-    for (int i=0; i<1000; i++) horizontalDerivative(dat_in, dx, imageWidth, imageHeight);
-    end_timer(); start_timer();
-    for (int i=0; i<1000; i++) magnitudeAngle(dx, dy, magn, angle, imageWidth, imageHeight);
-    end_timer(); 
+    for (int i=0; i<200; i++) verticalDerivative(dat_in, dy, imageWidth, imageHeight);
+    for (int i=0; i<200; i++) horizontalDerivative(dat_in, dx, imageWidth, imageHeight);
+    for (int i=0; i<200; i++) magnitudeAngle(dx, dy, magn, angle, imageWidth, imageHeight);
+    end_timer("Run"); 
 
     free(dy);
     free(dx);
