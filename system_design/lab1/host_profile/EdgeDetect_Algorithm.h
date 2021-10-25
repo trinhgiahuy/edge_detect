@@ -57,9 +57,15 @@ public:
 
     start_timer();
     for (int i=0; i<200; i++) verticalDerivative(dat_in, dy, imageWidth, imageHeight);
+    end_timer("Vertical"); 
+
+    start_timer();
     for (int i=0; i<200; i++) horizontalDerivative(dat_in, dx, imageWidth, imageHeight);
+    end_timer("Horizontal"); 
+
+    start_timer();
     for (int i=0; i<200; i++) magnitudeAngle(dx, dy, magn, angle, imageWidth, imageHeight);
-    end_timer("Run"); 
+    end_timer("Mag/Angle"); 
 
     free(dy);
     free(dx);
