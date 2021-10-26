@@ -30,12 +30,7 @@ class sys_accelerator : public sc_module, public sysbus_axi {
   
     //== Local signals
 
-    Connections::Combinational<ac_int<32, false>>  mem_in_addr;
-    Connections::Combinational<ac_int<8, false>>   mem_in_burst;
     Connections::Combinational<ac_int<64, false>>  mem_in_data;
-
-    Connections::Combinational<ac_int<32, false>>  mem_out_addr;
-    Connections::Combinational<ac_int<8, false>>   mem_out_burst;
     Connections::Combinational<ac_int<64, false>>  mem_out_data;
 
     //== Instances
@@ -50,27 +45,22 @@ class sys_accelerator : public sc_module, public sysbus_axi {
         bus_if_inst.rstn                      (rstn);
         bus_if_inst.r_master0                 (r_master0);
         bus_if_inst.w_master0                 (w_master0);
-        bus_if_inst.mem_in_addr               (mem_in_addr);
-        bus_if_inst.mem_in_burst              (mem_in_burst);
         bus_if_inst.mem_in_data               (mem_in_data);
-        bus_if_inst.mem_out_addr              (mem_out_addr);
-        bus_if_inst.mem_out_burst             (mem_out_burst);
         bus_if_inst.mem_out_data              (mem_out_data);
+        bus_if_inst.height                    (height);
+        bus_if_inst.width                     (width);
+        bus_if_inst.input_offset              (input_offset);
+        bus_if_inst.output_offset             (output_offset);
+        bus_if_inst.start                     (start);
+        bus_if_inst.done                      (done);
 
         magnitude_angle_inst.clk              (clk);
-        magnitude_angle_inst.rstn             (rstn);
-        magnitude_angle_inst.mem_in_addr      (mem_in_addr);
-        magnitude_angle_inst.mem_in_burst     (mem_in_burst);
+        magnitude_angle_inst.rstn             (rstn);       
         magnitude_angle_inst.mem_in_data      (mem_in_data);
-        magnitude_angle_inst.mem_out_addr     (mem_out_addr);
-        magnitude_angle_inst.mem_out_burst    (mem_out_burst);
         magnitude_angle_inst.mem_out_data     (mem_out_data);
-        magnitude_angle_inst.input_offset     (input_offset);
-        magnitude_angle_inst.output_offset    (output_offset);
         magnitude_angle_inst.height           (height);
         magnitude_angle_inst.width            (width);
-        magnitude_angle_inst.start            (start);
-        magnitude_angle_inst.done             (done);
+      
     }
 };
 

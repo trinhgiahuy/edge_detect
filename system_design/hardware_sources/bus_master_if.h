@@ -13,20 +13,25 @@ class bus_master_if : public sc_module, public sysbus_axi {
 
   sc_in<bool> CCS_INIT_S1(clk);
   sc_in<bool> CCS_INIT_S1(rstn);
+
+  sc_in<ac_int<12, false> >                height;
+  sc_in<ac_int<12, false> >                width;
+  sc_in<ac_int<18, false>>                 CCS_INIT_S1(input_offset);
+  sc_in<ac_int<18, false>>                 CCS_INIT_S1(output_offset);
+
+  Connections::SyncIn                      CCS_INIT_S1(start);
+  Connections::SyncOut                     CCS_INIT_S1(done);
 //Bus I/Fs
   r_master<> CCS_INIT_S1(r_master0);
   w_master<> CCS_INIT_S1(w_master0);
 
 //User side
 //Read
-  Connections::In<ac_int<32, false>>  CCS_INIT_S1(mem_in_addr);
-  Connections::In<ac_int<8, false>>     CCS_INIT_S1(mem_in_burst);
   Connections::Out<ac_int<64, false>>         CCS_INIT_S1(mem_in_data);
 //Write
-  Connections::In<ac_int<32, false>>  CCS_INIT_S1(mem_out_addr);
-  Connections::In<ac_int<8, false>>     CCS_INIT_S1(mem_out_burst);
   Connections::In<ac_int<64, false>>          CCS_INIT_S1(mem_out_data);
 
+  Connections::SyncChannel          CCS_INIT_S1(sync);
   //== Constructor
 
   SC_CTOR(bus_master_if) {
@@ -51,18 +56,19 @@ class bus_master_if : public sc_module, public sysbus_axi {
 
   void read_master_process() {
     AXI4_R_SEGMENT_RESET(r_segment0, r_master0);
-    mem_in_addr.Reset();
-    mem_in_burst.Reset();
     mem_in_data.Reset();
-
+    start.Reset();
+    sync.reset_sync_out();
     wait();
 
     while (1) {
       ex_ar_payload ar;
 
-      ar.addr = uint32(mem_in_addr.Pop()); // << SHIFT; //convert to byte address
+      start.sync_in();
+      sync.sync_out();
+      ar.addr = uint32(input_offset.read().to_int()); // << SHIFT; //convert to byte address
       ar.addr += WEIGHT_MEMORY_BASE;
-      ar.ex_len = mem_in_burst.Pop();
+      ar.ex_len = height.read()*width.read()/N-1;
       r_segment0_ex_ar_chan.Push(ar);
 
       #pragma hls_pipeline_init_interval 1
@@ -79,16 +85,16 @@ class bus_master_if : public sc_module, public sysbus_axi {
 
   void write_master_process() {
     AXI4_W_SEGMENT_RESET(w_segment0, w_master0);
-    mem_out_addr.Reset();
-    mem_out_burst.Reset();
     mem_out_data.Reset();
+    done.Reset();
+    sync.reset_sync_in();
     wait();
 
     while (1) {
       ex_aw_payload aw;
-
-      aw.addr = uint32(mem_out_addr.Pop()); // << SHIFT; // convert to byte address
-      aw.ex_len = mem_out_burst.Pop();
+      sync.sync_in();
+      aw.addr = uint32(output_offset.read()); // << SHIFT; // convert to byte address
+      aw.ex_len = height.read()*width.read()/N-1;
       aw.addr += WEIGHT_MEMORY_BASE;
       w_segment0_ex_aw_chan.Push(aw);
 
@@ -103,6 +109,7 @@ class bus_master_if : public sc_module, public sysbus_axi {
       }
 
       b_payload b = w_segment0_b_chan.Pop();
+      done.sync_out();
     }
   }
 };
