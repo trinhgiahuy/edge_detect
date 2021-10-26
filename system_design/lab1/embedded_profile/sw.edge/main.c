@@ -119,21 +119,9 @@ void edge_detect_sw(unsigned char *data_in,     // image data (streamed in by pi
   const int kernel[] = KERNEL;
   unsigned long start, end;
 
-  start = TIMER;
   verticalDerivativeSw(data_in, dy, kernel);
-  end = TIMER;
-  printf("Vertical derivative clocks: %d \n", end-start);
-
-  start = TIMER;
   horizontalDerivativeSw(data_in, dx, kernel);
-  end = TIMER;
-  printf("Horizontal derivative clocks: %d \n", end-start);
-
-  start = TIMER;
   magnitudeAngleSw(dx, dy, data_out);
-  end = TIMER;
-  printf("Magnitude/angle clocks: %d \n", end-start);
-
 }
 
 
