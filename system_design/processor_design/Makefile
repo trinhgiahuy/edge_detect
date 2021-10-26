@@ -2,7 +2,7 @@
 #====== Tool versions =====================================
 
 CATAPULT_VERSION        = 10.6a
-QUESTA_VERSION          = 2020.3_2
+QUESTA_VERSION          = 2020.3
 
 #====== Tool directories, update for local installation ===
 
@@ -10,7 +10,6 @@ export CATAPULT_HOME    = /wv/hlsb/CATAPULT/$(CATAPULT_VERSION)/PRODUCTION/aol/M
 #export QUESTA_HOME      = /u/release/$(QUESTA_VERSION)/modeltech
 export QUESTA_HOME      = /wv/hlstools/questasim/10.7d/ixl64/questasim
 export FILE_IO_DIR      = ../data
-#export FILE_IO_SRC      = ../../file_io
 
 include env_vars.mk
 
@@ -80,6 +79,7 @@ endif
 
 SCC_INCLUDES  = -I $(hw_sources)
 SCC_INCLUDES += -I $(CONNECTIONS_HOME)/include
+SCC_INCLUDES += -I $(CONNECTIONS_HOME)/examples/matchlib/toolkit/include
 SCC_INCLUDES += -I $(MATCHLIB_HOME)/cmod/include
 SCC_INCLUDES += -I $(CATAPULT_HOME)/shared/include
 SCC_INCLUDES += -I $(accelerator)
