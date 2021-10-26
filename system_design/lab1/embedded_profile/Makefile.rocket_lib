@@ -1,0 +1,38 @@
+
+QUESTA_VERSION  ?= 2020.3
+QUESTA_HOME     ?= /u/release/$(QUESTA_VERSION)/modeltech
+
+ROCKET_CORE_HOME = ../../processor_design/rocket_core
+
+VFLAGS           = +define+RANDOMIZE_REG_INIT
+VFLAGS          += +define+RANDOMIZE_MEM_INIT 
+VFLAGS          += +define+RANDOMIZE_GARBAGE_ASSIGN 
+VFLAGS          += +define+RANDOMIZE_INVALID_ASSIGN 
+VFLAGS          += +define+RANDOMIZE_DELAY=1
+VFLAGS          += +define+PRINTF_COND=1
+
+VLOG             = $(QUESTA_HOME)/bin/vlog
+VMAP             = $(QUESTA_HOME)/bin/vmap
+VLIB             = $(QUESTA_HOME)/bin/vlib
+
+LIBRARY          = rocket_lib
+LIBRARY_DIR      = ./rocket_lib
+
+SOURCES          = $(ROCKET_CORE_HOME)/vsim/generated-src/freechips.rocketchip.system.DefaultConfig.v 
+SOURCES         += $(ROCKET_CORE_HOME)/src/main/resources/vsrc/AsyncResetReg.v 
+SOURCES         += $(ROCKET_CORE_HOME)/src/main/resources/vsrc/plusarg_reader.v 
+SOURCES         += $(ROCKET_CORE_HOME)/src/main/resources/vsrc/EICG_wrapper.v 
+SOURCES         += $(ROCKET_CORE_HOME)/vsim/generated-src/freechips.rocketchip.system.DefaultConfig.behav_srams.v
+
+$(LIBRARY): $(SOURCES)
+	@echo "VLIB    $(LIBRARY_DIR)"
+	@$(VLIB) $(LIBRARY_DIR)                                 >> make.out
+	@echo "VMAP    $(LIBRARY) $(LIBRARY_DIR)"
+	@$(VMAP) $(LIBRARY) $(LIBRARY_DIR)                      >> make.out
+
+	@echo "VLOG    $(ROCKET_CORE_HOME)/vsim/generated-src/freechips.rocketchip.system.DefaultConfig.v "
+	@$(VLOG) -work $(LIBRARY) +acc=all $(VFLAGS) $(SOURCES) >> make.out
+
+clean:
+	@echo "RM      $(LIBRARY_DIR)
+	@rm -rf $(LIBRARY_DIR) modelsim.ini                     >> make.out
