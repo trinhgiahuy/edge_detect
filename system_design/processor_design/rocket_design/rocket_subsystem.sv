@@ -670,4 +670,8 @@ module rocket_subsystem(
        .l2_frontend_bus_axi4_0_r_bits_last      (l2_frontend_bus_axi4_0_r_bits_last)
    );
 
+   always @(P_AW_ADDR) begin
+      if (P_AW_ADDR == 32'h6000FFF0) $finish();
+   end
+
 endmodule

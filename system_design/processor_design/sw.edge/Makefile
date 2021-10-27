@@ -49,7 +49,7 @@ $(TARGET).x: $(OBJS)
 	@echo "LD     --script link.ld -o $(TARGET).x"
 	@$(LD) -o $(TARGET).x $(OBJS) $(LDFLAGS) --script link.ld -lc -Map $(TARGET).map >> make.out
 
-main.o: main.c console.h 
+main.o: main.c console.h  $(COMMON_SOURCE)/common_stim_results.h
 	@echo "CC     main.c"
 	@$(CC) $(CCFLAGS) -o main.o -c main.c >> make.out
 	

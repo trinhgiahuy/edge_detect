@@ -194,7 +194,7 @@ mtvec_handler:
 	j mtvec_handler
 
 done:
-	li x1, 0x60000000
+	li x1, 0x6000FFF0
         li x2, 0x000000FF
         sw x2, (x1)
         j done

@@ -136,9 +136,7 @@ public:
       
         if (reg_addr == GO_REG) {
           busy.write(1);
-          printf("Syncing\n");
           start.sync_out();
-          printf("Done Syncing\n");
         } 
       } 
 

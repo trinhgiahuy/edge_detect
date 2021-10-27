@@ -1,26 +1,27 @@
 #include "edge_detect_defines.h"
 
-#define MEM_BASE 0x70000000
+#define MEM_BASE ((unsigned char *) 0x70000000)
 
   void check_results(float *sw_results, float *hw_results)
   {
     float mag_err = 0;
     float ang_err = 0;
     int i;
+    const int chatty = 0;
 
-    printf("comparing magnitudes: \n");
+    if (chatty) printf("comparing magnitudes: \n");
     for (i=0; i<IMAGE_SIZE; i++) {
       if (sw_results[i] != hw_results[i]) {
-         printf("difference[%d]: sw: %f hw: %f \n", i, sw_results[i], hw_results[i]);
+         if (chatty) printf("difference[%d]: sw: %f hw: %f \n", i, sw_results[i], hw_results[i]);
          mag_err += abs(sw_results[i] - hw_results[i]);
       }
     }
     mag_err = mag_err/IMAGE_SIZE;
 
-    printf("comparing angles: \n");
+    if (chatty) printf("comparing angles: \n");
     for (i=IMAGE_SIZE; i<IMAGE_SIZE * 2; i++) {
       if (sw_results[i] != hw_results[i]) {
-         printf("difference[%d]: sw: %f hw: %f \n", i-IMAGE_SIZE, sw_results[i], hw_results[i]);
+         if (chatty) printf("difference[%d]: sw: %f hw: %f \n", i-IMAGE_SIZE, sw_results[i], hw_results[i]);
          ang_err += abs(sw_results[i] - hw_results[i]);
       }
     }
@@ -78,13 +79,9 @@
    static inline float ufixed_to_float(int fixed_value, int width, int integer_bits)
   { 
     unsigned int  fractional_bits = width - integer_bits;
-    unsigned long mask = (1 << width) - 1;
-    int neg = 0;
     float f;
     
-    
     f = ((float) fixed_value) / ((float)(1 << fractional_bits)) ;
-     
     
     return f;
   }
@@ -129,6 +126,7 @@
     int b;
     int c;
     unsigned char r;
+    const int chatty = 0;
   
     for (y = 0; y < IMAGE_HEIGHT; y++) {
       for (x = 0; x < IMAGE_WIDTH; x++) {
@@ -149,7 +147,7 @@
         if (f < -128.0) f = -128.0;
         r = float_to_fixed(f, 8, 8);
         TB_WRITE_8(dy + offset, r);
-printf("vd y: %d x: %d offset: %d value: %f \n", y, x, offset, f);
+        if (chatty) printf("vd y: %d x: %d offset: %d value: %f \n", y, x, offset, f);
       }
     }
   }
@@ -171,6 +169,7 @@ printf("vd y: %d x: %d offset: %d value: %f \n", y, x, offset, f);
     int b;
     int c;
     unsigned char r;
+    const int chatty = 0;
 
     for (y = 0; y < IMAGE_HEIGHT; y++) {
       for (x = 0; x < IMAGE_WIDTH; x++) {
@@ -192,7 +191,7 @@ printf("vd y: %d x: %d offset: %d value: %f \n", y, x, offset, f);
         if (f < -128.0) f = -128.0;
         r = float_to_fixed(f, 8, 8);
         TB_WRITE_8(dy + offset, r);
-printf("hd y: %d x: %d offset: %d value: %f (%d + %d) \n", y, x, offset, f, a, 0-c);
+        if (chatty) printf("hd y: %d x: %d offset: %d value: %f (%d + %d) \n", y, x, offset, f, a, 0-c);
       }
     }
   }
@@ -202,41 +201,48 @@ printf("hd y: %d x: %d offset: %d value: %f (%d + %d) \n", y, x, offset, f, a, 0
   //   Compute the magnitute and angle based on the horizontal and vertical
   //   derivative results
   void magnitudeAngleHw(unsigned char  *dxy,
-                        unsigned char  *temp,
+                        unsigned char  *mag_angle_ptr,
                         float          *data_out) 
   {
-    unsigned long long magnitude_array;
-    unsigned long long angle_array; 
+    unsigned long long mag_angle_array;
+    unsigned long magnitude_array;
+    unsigned long angle_array; 
     unsigned char magnitude;
     unsigned char angle;
     int i;
     int j;
+    const int chatty = 0;
+    const int copy_convert = 0;
   
     SET_HEIGHT(IMAGE_HEIGHT);
     SET_WIDTH(IMAGE_WIDTH);
     SET_INPUT_OFFSET(((unsigned char *)dxy) - SHARED_MEMORY_BASE);
-    SET_OUTPUT_OFFSET(((unsigned char *)temp) - SHARED_MEMORY_BASE);
+    SET_OUTPUT_OFFSET(((unsigned char *)mag_angle_ptr) - SHARED_MEMORY_BASE);
     
     GO;
     WAIT_FOR_DONE;
+ 
+    if (copy_convert) { 
+      // copy from mag_angle_ptr to data_out
+      // convert from fixed point to floats as it is copied
   
-    // copy from temp to data_out
-    // convert from fixed point to floats as it is copied
-  
-    for (i=0; i<IMAGE_SIZE * 2; i+=2 * N) {
-       magnitude_array = TB_READ_32(temp + i );
-       angle_array     = TB_READ_32(temp + i + N);
-  
-printf("magnitudes read at: %08x = %016llx \n", temp + i, magnitude_array);
-printf("angles read at:     %08x = %016llx \n", temp + i + N, angle_array);  
-
-       for (j=0; j<N; j++) {
+      for (i=0; i<IMAGE_SIZE * 2; i+=8) {
+        mag_angle_array = TB_READ_64(mag_angle_ptr + i);
+ 
+        magnitude_array = mag_angle_array & 0xFFFFFFFF;
+        angle_array     = (mag_angle_array >> 32) & 0xFFFFFFFF;
+   
+        if (chatty) printf("magnitudes read at: %08lx = %08lx \n", (unsigned long) (mag_angle_ptr + i), magnitude_array);
+        if (chatty) printf("angles read at:     %08lx = %08lx \n", (unsigned long) (mag_angle_ptr + i + 4), angle_array);  
+ 
+        for (j=0; j<4; j++) {
           magnitude = (magnitude_array >> (j * 8)) & 0xFF;
           angle = (angle_array >> (j * 8)) & 0xFF;
           data_out[i/2 + j] = ufixed_to_float(magnitude, 8, 8);
           data_out[IMAGE_SIZE + i/2 + j] = fixed_to_float(angle, 8, 3);
        }
-    } 
+     } 
+    }
   }
 
   void edge_detect_hw(unsigned char *data_in,     // image data (streamed in by pixel)
@@ -353,29 +359,31 @@ printf("angles read at:     %08x = %016llx \n", temp + i + N, angle_array);
     static float         dy[IMAGE_SIZE];
 
     const int kernel[] = KERNEL;
+    const int chatty = 0;
 
     verticalDerivativeSw(data_in, dy, kernel);
     horizontalDerivativeSw(data_in, dx, kernel);
     magnitudeAngleSw(dx, dy, data_out);
 
-    // compare dx
+    if (chatty) {
+      // compare dx
     
-    int x, y, ih, is;
-    for (y=0; y<IMAGE_HEIGHT; y++) {
-      for (x=0; x<IMAGE_WIDTH; x++) {
-        is = y * IMAGE_WIDTH + x;
-        ih = calc_interleave(x, y, IMAGE_WIDTH);
-        printf("sw dx[%d] = %f hw dx[%d] = %f \n", is, dx[is], ih, (float) (signed char) TB_READ_8(0x70001000 + ih));
-      }
-    } 
-    // compare dy
-    
-    for (y=0; y<IMAGE_HEIGHT; y++) {
-      for (x=0; x<IMAGE_WIDTH; x++) {
-        is = y * IMAGE_WIDTH + x;
-        ih = calc_interleave(x, y, IMAGE_WIDTH) + 4;
-        printf("sw dy[%d] = %f hw dy[%d] = %f \n", is, dy[is], ih, (float) (signed char) TB_READ_8(0x70001000 + ih));
-      }
-    } 
-
+      int x, y, ih, is;
+      for (y=0; y<IMAGE_HEIGHT; y++) {
+        for (x=0; x<IMAGE_WIDTH; x++) {
+          is = y * IMAGE_WIDTH + x;
+          ih = calc_interleave(x, y, IMAGE_WIDTH);
+          printf("sw dx[%d] = %f hw dx[%d] = %f \n", is, dx[is], ih, (float) (signed char) TB_READ_8(MEM_BASE + 0x1000 + ih));
+        }
+      } 
+      // compare dy
+      
+      for (y=0; y<IMAGE_HEIGHT; y++) {
+        for (x=0; x<IMAGE_WIDTH; x++) {
+          is = y * IMAGE_WIDTH + x;
+          ih = calc_interleave(x, y, IMAGE_WIDTH) + 4;
+          printf("sw dy[%d] = %f hw dy[%d] = %f \n", is, dy[is], ih, (float) (signed char) TB_READ_8(MEM_BASE + 0x1000 + ih));
+        }
+      } 
+    }
   }
