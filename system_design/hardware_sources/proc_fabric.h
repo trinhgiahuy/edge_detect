@@ -15,18 +15,18 @@ public:
 
   // ports to the slaves
   //  shared memory from               0x70000000 to 0x80000000
-  //  register bank for accelerator at 0x60000000 to 0x60010000
   //  UART at                          0x60080000 to 0x60090000
   //  Timer at                         0x600A0000 to 0x600B0000
+  //  register bank for accelerator at 0x60000000 to 0x60010000
 
   r_master<> CCS_INIT_S1(r_mem);
   w_master<> CCS_INIT_S1(w_mem);
-  r_master<> CCS_INIT_S1(r_reg);
-  w_master<> CCS_INIT_S1(w_reg);
   r_master<> CCS_INIT_S1(r_uart);
   w_master<> CCS_INIT_S1(w_uart);
   r_master<> CCS_INIT_S1(r_timer);
   w_master<> CCS_INIT_S1(w_timer);
+  r_master<> CCS_INIT_S1(r_reg);
+  w_master<> CCS_INIT_S1(w_reg);
 
   // ports to the masters
   //  master 0 = cpu
@@ -47,42 +47,42 @@ public:
   AxiSplitter<sysbus_axi4_config, numSlaves, numAddrBitsToInspect, false, true> CCS_INIT_S1(cpu_router);
   AxiSplitter<sysbus_axi4_config, numSlaves, numAddrBitsToInspect, false, true> CCS_INIT_S1(acc_router);
 
-  AxiArbiter<sysbus_axi4_config, 2, 4> CCS_INIT_S1(mem_arbiter);
-  AxiArbiter<sysbus_axi4_config, 2, 4> CCS_INIT_S1(reg_arbiter);
-  AxiArbiter<sysbus_axi4_config, 2, 4> CCS_INIT_S1(uart_arbiter);
-  AxiArbiter<sysbus_axi4_config, 2, 4> CCS_INIT_S1(timer_arbiter);
+  AxiArbiter<sysbus_axi4_config, numMasters, 4> CCS_INIT_S1(mem_arbiter);
+  AxiArbiter<sysbus_axi4_config, numMasters, 4> CCS_INIT_S1(uart_arbiter);
+  AxiArbiter<sysbus_axi4_config, numMasters, 4> CCS_INIT_S1(timer_arbiter);
+  AxiArbiter<sysbus_axi4_config, numMasters, 4> CCS_INIT_S1(reg_arbiter);
   
-  typename axi::axi4<sysbus_axi4_config>::read::template chan<>  CCS_INIT_S1(r_cpu2reg);
-  typename axi::axi4<sysbus_axi4_config>::write::template chan<> CCS_INIT_S1(w_cpu2reg);
   typename axi::axi4<sysbus_axi4_config>::read::template chan<>  CCS_INIT_S1(r_cpu2mem);
   typename axi::axi4<sysbus_axi4_config>::write::template chan<> CCS_INIT_S1(w_cpu2mem);
   typename axi::axi4<sysbus_axi4_config>::read::template chan<>  CCS_INIT_S1(r_cpu2uart);
   typename axi::axi4<sysbus_axi4_config>::write::template chan<> CCS_INIT_S1(w_cpu2uart);
   typename axi::axi4<sysbus_axi4_config>::read::template chan<>  CCS_INIT_S1(r_cpu2timer);
   typename axi::axi4<sysbus_axi4_config>::write::template chan<> CCS_INIT_S1(w_cpu2timer);
+  typename axi::axi4<sysbus_axi4_config>::read::template chan<>  CCS_INIT_S1(r_cpu2reg);
+  typename axi::axi4<sysbus_axi4_config>::write::template chan<> CCS_INIT_S1(w_cpu2reg);
   
-  typename axi::axi4<sysbus_axi4_config>::read::template chan<>  CCS_INIT_S1(r_acc2reg);
-  typename axi::axi4<sysbus_axi4_config>::write::template chan<> CCS_INIT_S1(w_acc2reg);
   typename axi::axi4<sysbus_axi4_config>::read::template chan<>  CCS_INIT_S1(r_acc2mem);
   typename axi::axi4<sysbus_axi4_config>::write::template chan<> CCS_INIT_S1(w_acc2mem);
   typename axi::axi4<sysbus_axi4_config>::read::template chan<>  CCS_INIT_S1(r_acc2uart);
   typename axi::axi4<sysbus_axi4_config>::write::template chan<> CCS_INIT_S1(w_acc2uart);
   typename axi::axi4<sysbus_axi4_config>::read::template chan<>  CCS_INIT_S1(r_acc2timer);
   typename axi::axi4<sysbus_axi4_config>::write::template chan<> CCS_INIT_S1(w_acc2timer);
+  typename axi::axi4<sysbus_axi4_config>::read::template chan<>  CCS_INIT_S1(r_acc2reg);
+  typename axi::axi4<sysbus_axi4_config>::write::template chan<> CCS_INIT_S1(w_acc2reg);
 
   SC_CTOR(fabric)
   {
     addrBound[0][0] = 0x70000000;
     addrBound[0][1] = 0x7fffffff;
 
-    addrBound[1][0] = 0x60000000;
-    addrBound[1][1] = 0x6000ffff;
+    addrBound[1][0] = 0x60080000;
+    addrBound[1][1] = 0x6008ffff;
 
-    addrBound[2][0] = 0x60080000;
-    addrBound[2][1] = 0x6008ffff;
+    addrBound[2][0] = 0x600A0000;
+    addrBound[2][1] = 0x600Affff;
 
-    addrBound[3][0] = 0x600A0000;
-    addrBound[3][1] = 0x600Affff;
+    addrBound[3][0] = 0x60000000;
+    addrBound[3][1] = 0x6000ffff;
 
 
     cpu_router.clk(clk);
@@ -106,23 +106,23 @@ public:
     cpu_router.axi_wr_s_w[0] (w_cpu2mem.w);
     cpu_router.axi_wr_s_b[0] (w_cpu2mem.b);
 
-    cpu_router.axi_rd_s_ar[1](r_cpu2reg.ar);
-    cpu_router.axi_rd_s_r[1] (r_cpu2reg.r);
-    cpu_router.axi_wr_s_aw[1](w_cpu2reg.aw);
-    cpu_router.axi_wr_s_w[1] (w_cpu2reg.w);
-    cpu_router.axi_wr_s_b[1] (w_cpu2reg.b);
+    cpu_router.axi_rd_s_ar[1](r_cpu2uart.ar);
+    cpu_router.axi_rd_s_r[1] (r_cpu2uart.r);
+    cpu_router.axi_wr_s_aw[1](w_cpu2uart.aw);
+    cpu_router.axi_wr_s_w[1] (w_cpu2uart.w);
+    cpu_router.axi_wr_s_b[1] (w_cpu2uart.b);
 
-    cpu_router.axi_rd_s_ar[2](r_cpu2uart.ar);
-    cpu_router.axi_rd_s_r[2] (r_cpu2uart.r);
-    cpu_router.axi_wr_s_aw[2](w_cpu2uart.aw);
-    cpu_router.axi_wr_s_w[2] (w_cpu2uart.w);
-    cpu_router.axi_wr_s_b[2] (w_cpu2uart.b);
+    cpu_router.axi_rd_s_ar[2](r_cpu2timer.ar);
+    cpu_router.axi_rd_s_r[2] (r_cpu2timer.r);
+    cpu_router.axi_wr_s_aw[2](w_cpu2timer.aw);
+    cpu_router.axi_wr_s_w[2] (w_cpu2timer.w);
+    cpu_router.axi_wr_s_b[2] (w_cpu2timer.b);
 
-    cpu_router.axi_rd_s_ar[3](r_cpu2timer.ar);
-    cpu_router.axi_rd_s_r[3] (r_cpu2timer.r);
-    cpu_router.axi_wr_s_aw[3](w_cpu2timer.aw);
-    cpu_router.axi_wr_s_w[3] (w_cpu2timer.w);
-    cpu_router.axi_wr_s_b[3] (w_cpu2timer.b);
+    cpu_router.axi_rd_s_ar[3](r_cpu2reg.ar);
+    cpu_router.axi_rd_s_r[3] (r_cpu2reg.r);
+    cpu_router.axi_wr_s_aw[3](w_cpu2reg.aw);
+    cpu_router.axi_wr_s_w[3] (w_cpu2reg.w);
+    cpu_router.axi_wr_s_b[3] (w_cpu2reg.b);
 
 
     acc_router.clk(clk);
@@ -147,23 +147,23 @@ public:
     acc_router.axi_wr_s_w[0] (w_acc2mem.w);
     acc_router.axi_wr_s_b[0] (w_acc2mem.b);
 
-    acc_router.axi_rd_s_ar[1](r_acc2reg.ar);
-    acc_router.axi_rd_s_r[1] (r_acc2reg.r);
-    acc_router.axi_wr_s_aw[1](w_acc2reg.aw);
-    acc_router.axi_wr_s_w[1] (w_acc2reg.w);
-    acc_router.axi_wr_s_b[1] (w_acc2reg.b);
+    acc_router.axi_rd_s_ar[1](r_acc2uart.ar);
+    acc_router.axi_rd_s_r[1] (r_acc2uart.r);
+    acc_router.axi_wr_s_aw[1](w_acc2uart.aw);
+    acc_router.axi_wr_s_w[1] (w_acc2uart.w);
+    acc_router.axi_wr_s_b[1] (w_acc2uart.b);
 
-    acc_router.axi_rd_s_ar[2](r_acc2uart.ar);
-    acc_router.axi_rd_s_r[2] (r_acc2uart.r);
-    acc_router.axi_wr_s_aw[2](w_acc2uart.aw);
-    acc_router.axi_wr_s_w[2] (w_acc2uart.w);
-    acc_router.axi_wr_s_b[2] (w_acc2uart.b);
+    acc_router.axi_rd_s_ar[2](r_acc2timer.ar);
+    acc_router.axi_rd_s_r[2] (r_acc2timer.r);
+    acc_router.axi_wr_s_aw[2](w_acc2timer.aw);
+    acc_router.axi_wr_s_w[2] (w_acc2timer.w);
+    acc_router.axi_wr_s_b[2] (w_acc2timer.b);
 
-    acc_router.axi_rd_s_ar[3](r_acc2timer.ar);
-    acc_router.axi_rd_s_r[3] (r_acc2timer.r);
-    acc_router.axi_wr_s_aw[3](w_acc2timer.aw);
-    acc_router.axi_wr_s_w[3] (w_acc2timer.w);
-    acc_router.axi_wr_s_b[3] (w_acc2timer.b);
+    acc_router.axi_rd_s_ar[3](r_acc2reg.ar);
+    acc_router.axi_rd_s_r[3] (r_acc2reg.r);
+    acc_router.axi_wr_s_aw[3](w_acc2reg.aw);
+    acc_router.axi_wr_s_w[3] (w_acc2reg.w);
+    acc_router.axi_wr_s_b[3] (w_acc2reg.b);
 
 
     mem_arbiter.clk(clk);
@@ -185,25 +185,6 @@ public:
     mem_arbiter.axi_wr_s(w_mem);
     
     
-    reg_arbiter.clk(clk);
-    reg_arbiter.reset_bar(rst_bar);
-
-    reg_arbiter.axi_rd_m_ar[0](r_cpu2reg.ar);
-    reg_arbiter.axi_rd_m_r[0] (r_cpu2reg.r);
-    reg_arbiter.axi_wr_m_aw[0](w_cpu2reg.aw);
-    reg_arbiter.axi_wr_m_w[0] (w_cpu2reg.w);
-    reg_arbiter.axi_wr_m_b[0] (w_cpu2reg.b);
-    
-    reg_arbiter.axi_rd_m_ar[1](r_acc2reg.ar);
-    reg_arbiter.axi_rd_m_r[1] (r_acc2reg.r);
-    reg_arbiter.axi_wr_m_aw[1](w_acc2reg.aw);
-    reg_arbiter.axi_wr_m_w[1] (w_acc2reg.w);
-    reg_arbiter.axi_wr_m_b[1] (w_acc2reg.b);
-    
-    reg_arbiter.axi_rd_s(r_reg);
-    reg_arbiter.axi_wr_s(w_reg);
-
-
     uart_arbiter.clk(clk);
     uart_arbiter.reset_bar(rst_bar);
 
@@ -240,5 +221,25 @@ public:
     
     timer_arbiter.axi_rd_s(r_timer);
     timer_arbiter.axi_wr_s(w_timer);
+
+
+    reg_arbiter.clk(clk);
+    reg_arbiter.reset_bar(rst_bar);
+
+    reg_arbiter.axi_rd_m_ar[0](r_cpu2reg.ar);
+    reg_arbiter.axi_rd_m_r[0] (r_cpu2reg.r);
+    reg_arbiter.axi_wr_m_aw[0](w_cpu2reg.aw);
+    reg_arbiter.axi_wr_m_w[0] (w_cpu2reg.w);
+    reg_arbiter.axi_wr_m_b[0] (w_cpu2reg.b);
+    
+    reg_arbiter.axi_rd_m_ar[1](r_acc2reg.ar);
+    reg_arbiter.axi_rd_m_r[1] (r_acc2reg.r);
+    reg_arbiter.axi_wr_m_aw[1](w_acc2reg.aw);
+    reg_arbiter.axi_wr_m_w[1] (w_acc2reg.w);
+    reg_arbiter.axi_wr_m_b[1] (w_acc2reg.b);
+    
+    reg_arbiter.axi_rd_s(r_reg);
+    reg_arbiter.axi_wr_s(w_reg);
+
   }
 };
