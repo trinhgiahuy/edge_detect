@@ -1,0 +1,28 @@
+
+CATAPULT_HOME  ?= /wv/hlsb/CATAPULT/10.6a/PRODUCTION/aol/Mgc_home
+EDGE_DETECT     = ../../utils
+CXX             = g++
+CXX_FLAGS       = -O0 -Wno-write-strings
+
+CXX_INCLUDES   = -I $(hw_sources)
+CXX_INCLUDES  += -I .
+CXX_INCLUDES  += -I $(CONNECTIONS_HOME)/include
+CXX_INCLUDES  += -I $(CONNECTIONS_HOME)/examples/matchlib/toolkit/include
+CXX_INCLUDES  += -I $(MATCHLIB_HOME)/cmod/include
+CXX_INCLUDES  += -I $(CATAPULT_HOME)/shared/include
+
+IMAGE           = $(EDGE_DETECT)/image/people_gray.bmp
+
+hw_sources      = ../hardware_sources
+
+all: run
+
+run: edge_detect $(IMAGE)
+	./edge_detect $(IMAGE)
+
+edge_detect: $(hw_sources)/testbench.cpp EdgeDetect_Algorithm.h edge_defs.h Makefile
+	$(CXX) $(CXX_FLAGS) -o edge_detect $(hw_sources)/testbench.cpp $(CATAPULT_HOME)/shared/include/bmpUtil/bmp_io.cpp -I . -I $(CATAPULT_HOME)/shared/include 
+
+clean:
+	rm -f edge_detect 
+
