@@ -22,7 +22,7 @@ int main(int argument_count, char *argument_list[])
   static float          sw_data_out[2 * IMAGE_SIZE];
   static float          hw_data_out[2 * IMAGE_SIZE];
 
-  check_register_access();
+//check_register_access();
 
 /*
   printf("loading data... \n");
