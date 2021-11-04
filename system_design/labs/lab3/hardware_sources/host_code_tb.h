@@ -42,7 +42,7 @@ public:
 
     wait();
 
-    check_register_access();
+//   check_register_access();
 /*
     // inputs are preloaded into memory at 0x70000000
 
