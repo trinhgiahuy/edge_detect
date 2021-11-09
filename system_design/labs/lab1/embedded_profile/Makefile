@@ -121,7 +121,7 @@ CXX_LIBS      = -lsystemc
 marker_dir    = ./marker_dir
 work          = ./work
 opt_target    = testbench_opt
-hw_sources    = ../../hardware_sources
+hw_sources    = ../hardware_sources
 sw_sources    = ./source_sw_dir
 datafiles     = ../../data/image.mem
 

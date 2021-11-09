@@ -2,7 +2,7 @@
 QUESTA_VERSION  ?= 2020.3
 QUESTA_HOME     ?= /u/release/$(QUESTA_VERSION)/modeltech
 
-ROCKET_CORE_HOME = ../../processor_design/rocket_core
+ROCKET_CORE_HOME = ../../rocket_core
 
 VFLAGS           = +define+RANDOMIZE_REG_INIT
 VFLAGS          += +define+RANDOMIZE_MEM_INIT 

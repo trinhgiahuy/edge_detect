@@ -14,7 +14,7 @@ VSIM=$(QUESTA_HOME)/bin/vsim
 VLIB=$(QUESTA_HOME)/bin/vlib
 VMAP=$(QUESTA_HOME)/bin/vmap
 
-hw_sources    = ../../processor_design/rocket_design
+hw_sources    = ../../rocket_design
 
 VLOG_FLAGS    = +acc=all +incdir+$(hw_sources)
 VSIM_FLAGS    = -voptargs=+acc -work work -L rocket_lib
