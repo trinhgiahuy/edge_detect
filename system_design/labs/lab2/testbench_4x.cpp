@@ -73,7 +73,7 @@ CCS_MAIN(int argc, char *argv[])
   cout << "Running" << endl;
   //Run a  smaller image if doing C++ to RTL verifction so we don't have to wait too long
 #ifdef CCS_SCVERIFY
-  iH = iW = 100;
+  iH = iW = 128;
 #endif
   
   inst0.run(dat_in_orig,magn_orig,angle_orig,iW,iH);

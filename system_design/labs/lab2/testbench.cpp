@@ -76,7 +76,7 @@ CCS_MAIN(int argc, char *argv[])
   
 //Run a  smaller image if doing C++ to RTL verifction so we don't have to wait too long
 #ifdef CCS_SCVERIFY
-  iH = iW = 100;
+  iH = iW = 128;
 #endif
   //Run the orginal algorithm
   inst0.run(dat_in_orig,magn_orig,angle_orig,iW,iH);
