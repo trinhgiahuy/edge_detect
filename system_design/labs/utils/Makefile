@@ -2,7 +2,7 @@
 CATAPULT_HOME  ?= /wv/hlsb/CATAPULT/10.6a/PRODUCTION/aol/Mgc_home
 
 DATA_DIR        = ../data
-HLS_DIR         = ../../Edge_Detect_Workshop
+HLS_DIR         = .
 IMAGE           = $(HLS_DIR)/image/people_gray.bmp
 
 all: $(DATA_DIR)/image.mem $(DATA_DIR)/expected_results.bin
