@@ -1,0 +1,486 @@
+
+library(ram_1k_64_sp) {
+	delay_model		: table_lookup;
+	revision		: 1;
+	date			: "November, 2021";
+	comment			: "Note";
+	time_unit		: "1ns";
+	voltage_unit		: "1V";
+	current_unit		: "1mA";
+  	leakage_power_unit      : "1mW";
+	nom_process		: 1;
+	nom_temperature		: 25.000;
+	nom_voltage		: 1.800;
+	capacitive_load_unit	 (1,pf);
+
+	pulling_resistance_unit	        : "1kohm";
+
+	/* additional header data */
+	default_cell_leakage_power  : 0;
+	default_fanout_load			: 1;
+	default_inout_pin_cap		: 0.005;
+	default_input_pin_cap		: 0.005;
+	default_output_pin_cap		: 0.0;
+	default_max_transition		: 2.8; 
+
+    /* default attributes */
+    default_leakage_power_density : 0.0;
+    slew_derate_from_library      : 1;
+    slew_lower_threshold_pct_fall : 10.000;
+    slew_upper_threshold_pct_fall : 90.000;
+    slew_lower_threshold_pct_rise : 10.000;
+    slew_upper_threshold_pct_rise : 90.000;
+    input_threshold_pct_fall      : 50.000;
+    input_threshold_pct_rise      : 50.000;
+    output_threshold_pct_fall     : 50.000;
+    output_threshold_pct_rise     : 50.000;
+
+ 	/* k-factors */
+ 	k_process_cell_fall             : 1;
+ 	k_process_cell_leakage_power    : 0;
+ 	k_process_cell_rise             : 1;
+ 	k_process_fall_transition       : 1;
+ 	k_process_hold_fall             : 1;
+ 	k_process_hold_rise             : 1;
+ 	k_process_internal_power        : 0;
+ 	k_process_min_pulse_width_high  : 1;
+ 	k_process_min_pulse_width_low   : 1;
+ 	k_process_pin_cap               : 0;
+ 	k_process_recovery_fall         : 1;
+ 	k_process_recovery_rise         : 1;
+ 	k_process_rise_transition       : 1;
+ 	k_process_setup_fall            : 1;
+ 	k_process_setup_rise            : 1;
+ 	k_process_wire_cap              : 0;
+ 	k_process_wire_res              : 0;
+	k_temp_cell_fall		: 0.0;
+	k_temp_cell_rise		: 0.0;
+	k_temp_hold_fall                : 0.0;
+	k_temp_hold_rise                : 0.0;
+	k_temp_min_pulse_width_high     : 0.0;
+	k_temp_min_pulse_width_low      : 0.0;
+	k_temp_min_period               : 0.0;
+	k_temp_rise_propagation         : 0.0;
+	k_temp_fall_propagation         : 0.0;
+	k_temp_rise_transition          : 0.0;
+	k_temp_fall_transition          : 0.0;
+	k_temp_recovery_fall            : 0.0;
+	k_temp_recovery_rise            : 0.0;
+	k_temp_setup_fall               : 0.0;
+	k_temp_setup_rise               : 0.0;
+	k_volt_cell_fall                : 0.0;
+	k_volt_cell_rise                : 0.0;
+	k_volt_hold_fall                : 0.0;
+	k_volt_hold_rise                : 0.0;
+	k_volt_min_pulse_width_high     : 0.0;
+	k_volt_min_pulse_width_low      : 0.0;
+	k_volt_min_period               : 0.0;
+	k_volt_rise_propagation         : 0.0;
+	k_volt_fall_propagation         : 0.0;
+	k_volt_rise_transition	        : 0.0;
+	k_volt_fall_transition	        : 0.0;
+	k_volt_recovery_fall            : 0.0;
+	k_volt_recovery_rise            : 0.0;
+	k_volt_setup_fall               : 0.0;
+	k_volt_setup_rise               : 0.0;
+
+
+	operating_conditions(typical) {
+		process		 : 1;
+		temperature	 : 25.000;
+		voltage		 : 1.800;
+		tree_type	 : balanced_tree;
+	}
+	default_operating_conditions : typical;
+
+	wire_load("sample") {
+		resistance	 : 1.6e-05;
+		capacitance	 : 0.0002;
+		area		 : 1.7;
+  		slope		 : 500;
+		fanout_length	 (1,500);
+	}
+    lu_table_template(mem_delay_template) {
+       variable_1 : total_output_net_capacitance;
+           index_1 ("1000, 1001, 1002, 1003, 1004, 1005, 1006");
+    }
+	lu_table_template(mem_constraint_template_1) {
+           variable_1 : related_pin_transition;
+               index_1 ("1000, 1001, 1002, 1003, 1004, 1005, 1006");
+        }
+	lu_table_template(mem_constraint_template_2) {
+           variable_1 : constrained_pin_transition;
+               index_1 ("1000, 1001, 1002, 1003, 1004, 1005, 1006");
+        }
+	lu_table_template(mem_load_template) {
+           variable_1 : total_output_net_capacitance;
+               index_1 ("1000, 1001, 1002, 1003, 1004, 1005, 1006");
+        }
+    power_lut_template(mem_passive_energy_template) {
+       variable_1 : input_transition_time;
+           index_1 ("1000, 1001");
+    }
+	library_features(report_delay_calculation);
+	type (DATA_BUS) {
+		base_type : array ;
+		data_type : bit ;
+		bit_width : 64;
+		bit_from  : 63;
+		bit_to	  : 0 ;
+		downto 	  : true ;
+	}
+
+	type (ADDR_BUS) {
+		base_type : array ;
+		data_type : bit ;
+		bit_width : 10;
+		bit_from  : 9;
+		bit_to    : 0 ;
+		downto    : true ;
+	}
+
+	
+cell(ram_1k_64_sp) {
+	area		 : 99537;
+	dont_use	 : TRUE;
+	dont_touch	 : TRUE;
+	interface_timing : TRUE;
+	memory() {
+		type : ram;
+		address_width : 10;
+		word_width : 64;
+	}
+
+	/* 	*******************************************************************
+		MEMORY WRITE INTERFACE: CENB (wr_en), AB (addr), DB (wr data), CLK
+	********************************************************************* */
+	pin(chip_en) {
+		direction : input;
+		capacitance : 0.0125;
+		timing() {
+			related_pin : "clk" ;
+			timing_type : setup_rising ;
+			rise_constraint(mem_constraint_template_1) {
+			/* 	************************************************************
+				CHANGES WITH RELATED PIN (CLK) TRANSITION
+			************************************************************** */
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values ( "0.256, 0.258, 0.262, 0.275, 0.302, 0.349, 0.446")
+				
+			}
+			fall_constraint(mem_constraint_template_2) {
+			/* 	************************************************************
+				CHANGES WITH CONSTRAINED PIN TRANSITION
+			************************************************************** */
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values ( "0.506, 0.513, 0.520, 0.550, 0.609, 0.712, 0.920")
+			}	
+		}
+		timing() {
+			related_pin : "clk" ;
+			timing_type : hold_rising ;
+			rise_constraint(mem_constraint_template_2) {
+			/* 	************************************************************
+				NO HOLD CONSTRATINT FOR CENB W.R.T CLKB
+			************************************************************** */
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values  ("0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000")
+			}
+			fall_constraint(mem_constraint_template_2) {
+			/* 	************************************************************
+				NO HOLD CONSTRATINT FOR CENB W.R.T CLKB
+			************************************************************** */
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values  ("0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000")
+			}	
+		}	
+	}
+
+
+	pin(wr_en) {
+		direction : input;
+		capacitance : 0.0125;
+		timing() {
+			related_pin : "clk" ;
+			timing_type : setup_rising ;
+			rise_constraint(mem_constraint_template_1) {
+			/* 	************************************************************
+				CHANGES WITH RELATED PIN (CLK) TRANSITION
+			************************************************************** */
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values ( "0.256, 0.258, 0.262, 0.275, 0.302, 0.349, 0.446")
+				
+			}
+			fall_constraint(mem_constraint_template_2) {
+			/* 	************************************************************
+				CHANGES WITH CONSTRAINED PIN TRANSITION
+			************************************************************** */
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values ( "0.506, 0.513, 0.520, 0.550, 0.609, 0.712, 0.920")
+			}	
+		}
+		timing() {
+			related_pin : "clk" ;
+			timing_type : hold_rising ;
+			rise_constraint(mem_constraint_template_2) {
+			/* 	************************************************************
+				NO HOLD CONSTRATINT FOR CENB W.R.T CLKB
+			************************************************************** */
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values  ("0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000")
+			}
+			fall_constraint(mem_constraint_template_2) {
+			/* 	************************************************************
+				NO HOLD CONSTRATINT FOR CENB W.R.T CLKB
+			************************************************************** */
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values  ("0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000")
+			}	
+		}	
+	}
+
+	bus (addr)  {
+		bus_type : ADDR_BUS;
+  	    direction : input;
+		capacitance : 0.0139855;
+	    internal_power(){
+	    	when : "wr_en";
+			power(mem_passive_energy_template) {
+				index_1 ("0.0 1.0");
+	    		values ("4.84741, 4.84741") 
+	    		/* Decoding Power*/
+			}
+		when : "rd_en";
+			power(mem_passive_energy_template) {
+				index_1 ("0.0 1.0");
+	    		values ("4.84741, 4.84741") 
+	    		/* Decoding Power*/
+			}
+		when : "chip_en";
+			power(mem_passive_energy_template) {
+				index_1 ("0.0 1.0");
+	    		values ("4.84741, 4.84741") 
+	    		/* Decoding Power*/
+			}	
+		}
+		timing() {
+			related_pin : "clk";
+			timing_type : setup_rising ;
+			rise_constraint(mem_constraint_template_2) {
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values  ("0.51, 0.515, 0.522, 0.55, 0.604, 0.7, 0.893")
+				/* 	************************************************************
+					CHANGES WITH CONSTRAINED PIN TRANSITION
+				************************************************************** */
+			}
+			fall_constraint(mem_constraint_template_2) {
+				/* 	************************************************************
+					CHANGES WITH CONSTRAINED PIN TRANSITION
+				************************************************************** */
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values  ("0.191, 0.203, 0.216, 0.275, 0.391, 0.592, 0.997")
+			}	
+		}
+		timing() {
+			related_pin : "clk";
+			timing_type : hold_rising ;
+			rise_constraint(mem_constraint_template_2) {
+			/* 	************************************************************
+				NO HOLD CONSTRATINT FOR AB W.R.T CLKB
+			************************************************************** */
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values  ("0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000")
+			}
+			fall_constraint(mem_constraint_template_2) {
+			/* 	************************************************************
+				NO HOLD CONSTRATINT FOR AB W.R.T CLKB
+			************************************************************** */
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values  ("0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000")
+			}	
+		}	
+	}
+
+	bus (d)	 {
+		bus_type : DATA_BUS;
+		direction : input;
+		capacitance : 0.00882947;
+		memory_write() {
+			address : addr;
+			clked_on : "clk";
+		}
+		timing() {
+			related_pin : "clk";
+			timing_type : setup_rising ;
+			rise_constraint(mem_constraint_template_1) {
+			/* 	************************************************************
+				CHANGES WITH RELATED PIN
+			************************************************************** */
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values  ("0.036, 0.039, 0.041, 0.053, 0.077, 0.119, 0.203")
+				
+			}
+			fall_constraint(mem_constraint_template_2) {
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				/* 	************************************************************
+					CHANGES WITH CONSTRAINED PIN
+				************************************************************** */
+				values  ("0.077, 0.084, 0.094, 0.131, 0.206, 0.337, 0.599")
+			}
+		}
+		timing() {
+			related_pin : "clk";
+			timing_type : hold_rising ;
+			rise_constraint(mem_constraint_template_1) {
+			/* 	************************************************************
+				CHANGES WITH RELATED PIN
+			************************************************************** */
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values  ("0.232, 0.230, 0.227, 0.216, 0.194, 0.156, 0.078")				
+			}
+			fall_constraint(mem_constraint_template_2) {
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values  ("0.186, 0.184, 0.181, 0.170, 0.148, 0.109, 0.032")
+			}	
+		}	
+	}
+
+	pin(clk) {
+		direction : input;
+		capacitance : 0.0373938;
+		clk	 : true;
+		min_pulse_width_low	 : 0.211;
+		min_pulse_width_high	 : 0.058;
+		min_period		 : 	0.950296; 
+        max_transition           : 2.8;
+	    internal_power(){
+	    	when : "wr_en";
+			power(mem_passive_energy_template) {
+	    		index_1 ("0.0 1.0");
+	    		values  ("0.0, 0.0")
+			}
+		when : "rd_en";
+			power(mem_passive_energy_template) {
+	    		index_1 ("0.0 1.0");
+	    		values  ("0.0, 0.0")
+			}
+		when : "chip_en";
+			power(mem_passive_energy_template) {
+	    		index_1 ("0.0 1.0");
+	    		values  ("0.0, 0.0")
+			}
+		}
+	    internal_power(){
+			when : "wr_en ";
+			rise_power(mem_passive_energy_template) {
+	    		index_1 ("0.0 1.0");
+	    		values  ("36.5534293805442, 36.5534293805442")
+	    		/* */
+			}	
+			fall_power(mem_passive_energy_template) {
+	    		index_1 ("0.0 1.0");
+	    		values  ("0.0, 0.0")
+			}
+		
+		}
+internal_power(){
+		
+			when : "rd_en ";
+			rise_power(mem_passive_energy_template) {
+	    		index_1 ("0.0 1.0");
+	    		values  ("26.1301886348944, 26.1301886348944")
+	    		/* */
+			}	
+			fall_power(mem_passive_energy_template) {
+	    		index_1 ("0.0 1.0");
+	    		values  ("0.0, 0.0")
+			}
+		
+		}
+
+	}
+
+		
+	pin(rd_en) {
+		direction : input;
+		capacitance : 0.0125;
+		timing() {
+			related_pin : "clk" ;
+			timing_type : setup_rising ;
+			rise_constraint(mem_constraint_template_1) {
+			/* 	************************************************************
+				CHANGES WITH RELATED PIN (CLK) TRANSITION
+			************************************************************** */
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values ( "0.256, 0.258, 0.262, 0.275, 0.302, 0.349, 0.446")
+				
+			}
+			fall_constraint(mem_constraint_template_2) {
+			/* 	************************************************************
+				CHANGES WITH CONSTRAINED PIN TRANSITION
+			************************************************************** */
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values ( "0.506, 0.513, 0.520, 0.550, 0.609, 0.712, 0.920")
+			}	
+		}
+		timing() {
+			related_pin : "clk" ;
+			timing_type : hold_rising ;
+			rise_constraint(mem_constraint_template_2) {
+			/* 	************************************************************
+				NO HOLD CONSTRATINT FOR CENB W.R.T CLKB
+			************************************************************** */
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values  ("0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000")
+			}
+			fall_constraint(mem_constraint_template_2) {
+			/* 	************************************************************
+				NO HOLD CONSTRATINT FOR CENB W.R.T CLKB
+			************************************************************** */
+				index_1 ("0.010, 0.050, 0.100, 0.300, 0.700, 1.400, 2.800");
+				values  ("0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000")
+			}	
+		}	
+	}
+
+	bus(q) {
+      	bus_type : DATA_BUS;
+        direction : output;
+        memory_read() {
+			address : addr;
+		}
+		timing() {
+			related_pin :	"clk";
+			timing_type : rising_edge;
+			timing_sense : non_unate;
+
+			cell_rise(mem_delay_template) { 
+			/* 	************************************************************
+				CHANGES WITH OUTPUT NET CAPACITANCE
+			************************************************************** */
+				index_1 ("0.000, 0.050, 0.100, 0.200, 0.370, 0.750, 1.480");
+				values  ("1.044296, 1.058296, 1.082296, 1.170296, 1.302296, 1.522296, 1.874296")
+			}
+			cell_fall(mem_delay_template) {
+			/* 	************************************************************
+				CHANGES WITH OUTPUT NET CAPACITANCE
+			************************************************************** */
+				index_1 ("0.000, 0.050, 0.100, 0.200, 0.370, 0.750, 1.480");
+				values  ("1.044296, 1.058296, 1.082296, 1.170296, 1.302296, 1.522296, 1.874296")
+			}
+			
+			rise_transition(mem_load_template) {
+				index_1 ("0.000, 0.050, 0.100, 0.200, 0.370, 0.750, 1.480");
+				values  ("0.138843, 0.151767, 0.2412, 0.588, 1.134, 1.722, 2.856")
+			}
+			fall_transition(mem_load_template) {
+				index_1 ("0.000, 0.050, 0.100, 0.200, 0.370, 0.750, 1.480");
+				values  ("0.046281, 0.050589, 0.0804, 0.196, 0.378, 0.574, 0.952")
+			}	
+		}
+	}
+
+	cell_leakage_power : 0.129554130786583;
+    }
+}
+		
