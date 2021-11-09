@@ -129,6 +129,10 @@
     unsigned char r;
     const int chatty = 0;
   
+    #ifndef HOST
+    unsigned long start = TIMER;
+    #endif
+  
     for (y = 0; y < IMAGE_HEIGHT; y++) {
       for (x = 0; x < IMAGE_WIDTH; x++) {
         a_index = clip(y - 1, IMAGE_HEIGHT-1) * IMAGE_WIDTH + x;
@@ -151,6 +155,13 @@
         if (chatty) printf("vd y: %d x: %d offset: %d value: %f \n", y, x, offset, f);
       }
     }
+
+    #ifndef HOST
+    unsigned long done = TIMER;
+
+    printf("Vertical derivative compute time: %d \n", done-start); 
+    #endif
+    
   }
   
   //--------------------------------------------------------------------------
@@ -172,6 +183,10 @@
     unsigned char r;
     const int chatty = 0;
 
+    #ifndef HOST
+    unsigned long start = TIMER;
+    #endif
+  
     for (y = 0; y < IMAGE_HEIGHT; y++) {
       for (x = 0; x < IMAGE_WIDTH; x++) {
   
@@ -195,6 +210,13 @@
         if (chatty) printf("hd y: %d x: %d offset: %d value: %f (%d + %d) \n", y, x, offset, f, a, 0-c);
       }
     }
+
+    #ifndef HOST
+    unsigned long done = TIMER;
+
+    printf("Horizontal derivative compute time: %d \n", done-start); 
+    #endif
+    
   }
    
   //--------------------------------------------------------------------------
@@ -370,7 +392,6 @@
 
     printf("SW compute time: %d \n", done-start); 
     #endif
-
     
   }
 
