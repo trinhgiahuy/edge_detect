@@ -1,6 +1,6 @@
 
 CATAPULT_HOME  ?= /wv/hlsb/CATAPULT/10.6a/PRODUCTION/aol/Mgc_home
-EDGE_DETECT     = ../../../Edge_Detect_Workshop
+EDGE_DETECT     = ../../utils
 CXX             = g++
 CXX_FLAGS       = -O0 -Wno-write-strings
 IMAGE           = $(EDGE_DETECT)/image/people_gray.bmp
