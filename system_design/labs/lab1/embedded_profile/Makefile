@@ -6,9 +6,9 @@ QUESTA_VERSION          = 2020.3_2
 
 #====== Tool directories, update for local installation ===
 
-export CATAPULT_HOME    = /wv/hlsb/CATAPULT/$(CATAPULT_VERSION)/PRODUCTION/aol/Mgc_home
-export QUESTA_HOME      = /u/release/$(QUESTA_VERSION)/modeltech
-export QUESTA_HOME      = /wv/hlstools/questasim/10.7d/ixl64/questasim
+export CATAPULT_HOME   ?= /wv/hlsb/CATAPULT/$(CATAPULT_VERSION)/PRODUCTION/aol/Mgc_home
+export QUESTA_HOME     ?= /u/release/$(QUESTA_VERSION)/modeltech
+export QUESTA_HOME     ?= /wv/hlstools/questasim/10.7d/ixl64/questasim
 export FILE_IO_DIR      = ../../data
 
 include env_vars.mk

@@ -6,8 +6,8 @@ QUESTA_VERSION          = 2020.3
 
 #====== Tool directories, update for local installation ===
 
-export CATAPULT_HOME    = /wv/hlsb/CATAPULT/$(CATAPULT_VERSION)/PRODUCTION/aol/Mgc_home
-export QUESTA_HOME      = /u/release/$(QUESTA_VERSION)/modeltech
+export CATAPULT_HOME   ?= /wv/hlsb/CATAPULT/$(CATAPULT_VERSION)/PRODUCTION/aol/Mgc_home
+export QUESTA_HOME     ?= /u/release/$(QUESTA_VERSION)/modeltech
 export FILE_IO_DIR      = ../../data
 export FILE_IO_SRC      = ../../file_io
 

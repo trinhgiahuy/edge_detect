@@ -1,5 +1,5 @@
 
-RISCV_GCC_HOME   = /home/russk/platforms/catapult_cpu_platforms/riscv-tools/riscv-gcc
+RISCV_GCC_HOME  ?= /home/russk/platforms/catapult_cpu_platforms/riscv-tools/riscv-gcc
 
 AS               = $(RISCV_GCC_HOME)/bin/riscv64-unknown-elf-as
 CC               = $(RISCV_GCC_HOME)/bin/riscv64-unknown-elf-gcc
